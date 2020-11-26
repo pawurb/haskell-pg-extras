@@ -1,6 +1,17 @@
-/* Table and index bloat in your database ordered by most wasteful */
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
-WITH constants AS (
+module PGExtras.Queries.Bloat (bloatSQL, displayBloat) where
+
+import PGExtras.Helpers (maybeText, maybeRational)
+import Database.PostgreSQL.Simple
+import Text.RawString.QQ
+import qualified Data.Text as Text
+import Control.Monad (forM_)
+import Data.List (intercalate)
+
+bloatSQL :: Query
+bloatSQL = [r|WITH constants AS (
   SELECT current_setting('block_size')::numeric AS bs, 23 AS hdr, 4 AS ma
 ), bloat_info AS (
   SELECT
@@ -59,5 +70,17 @@ SELECT
   CASE WHEN ipages < iotta THEN '0' ELSE (bs*(ipages-iotta))::bigint END AS raw_waste
 FROM
   index_bloat) bloat_summary
-ORDER BY raw_waste DESC, bloat DESC;
+ORDER BY raw_waste DESC, bloat DESC;|]
 
+displayBloat :: [(Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Rational, Maybe Text.Text)] -> IO ()
+displayBloat rows = do
+  putStrLn $ description
+  putStrLn $ intercalate " | " tableHeaders
+  forM_ rows $ \(arg1, arg2, arg3, arg4, arg5) ->
+    putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeRational(arg4) ++ " | " ++ maybeText(arg5)
+
+description :: [Char]
+description = "Table and index bloat in your database ordered by most wasteful"
+
+tableHeaders :: [[Char]]
+tableHeaders = ["type", "schemaname", "object_name", "bloat", "waste"]

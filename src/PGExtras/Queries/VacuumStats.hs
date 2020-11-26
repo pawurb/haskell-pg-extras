@@ -1,6 +1,17 @@
-/* Dead rows and whether an automatic vacuum is expected to be triggered */
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
-WITH table_opts AS (
+module PGExtras.Queries.VacuumStats (vacuumStatsSQL, displayVacuumStats) where
+
+import PGExtras.Helpers (maybeText)
+import Database.PostgreSQL.Simple
+import Text.RawString.QQ
+import qualified Data.Text as Text
+import Control.Monad (forM_)
+import Data.List (intercalate)
+
+vacuumStatsSQL :: Query
+vacuumStatsSQL = [r|WITH table_opts AS (
   SELECT
     pg_class.oid, relname, nspname, array_to_string(reloptions, '') AS relopts
   FROM
@@ -37,4 +48,18 @@ SELECT
 FROM
   pg_stat_user_tables psut INNER JOIN pg_class ON psut.relid = pg_class.oid
     INNER JOIN vacuum_settings ON pg_class.oid = vacuum_settings.oid
-ORDER BY 1;
+ORDER BY 1;|]
+
+displayVacuumStats :: [(Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text)] -> IO ()
+displayVacuumStats rows = do
+  putStrLn $ description
+  putStrLn $ intercalate " | " tableHeaders
+  forM_ rows $ \(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) ->
+    putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeText(arg4) ++ " | " ++ maybeText(arg5) ++ " | " ++ maybeText(arg6) ++ " | " ++ maybeText(arg7) ++ " | " ++ maybeText(arg8)
+
+description :: [Char]
+description = "Dead rows and whether an automatic vacuum is expected to be triggered"
+
+tableHeaders :: [[Char]]
+tableHeaders = ["schema", "table", "last_vacuum", "last_autovacuum", "rowcount", "dead_rowcount", "autovacuum_threshold", "expect_autovacuum"]
+

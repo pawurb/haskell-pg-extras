@@ -32,13 +32,34 @@ library
   hs-source-dirs:  src
   exposed-modules: PGExtras
   other-modules:
-                   PGExtras.CacheHit
-                   PGExtras.Extensions
+                   PGExtras.Queries.AllLocks
+                   PGExtras.Queries.Bloat
+                   PGExtras.Queries.Blocking
+                   PGExtras.Queries.CacheHit
+                   PGExtras.Queries.Calls
+                   PGExtras.Queries.Extensions
+                   PGExtras.Queries.IndexCacheHit
+                   PGExtras.Queries.IndexSize
+                   PGExtras.Queries.IndexUsage
+                   PGExtras.Queries.KillAll
+                   PGExtras.Queries.Locks
+                   PGExtras.Queries.LongRunningQueries
+                   PGExtras.Queries.Mandelbrot
+                   PGExtras.Queries.RecordsRank
+                   PGExtras.Queries.SeqScans
+                   PGExtras.Queries.TableCacheHit
+                   PGExtras.Queries.TableIndexesSize
+                   PGExtras.Queries.TableSize
+                   PGExtras.Queries.TotalIndexSize
+                   PGExtras.Queries.TotalTableSize
+                   PGExtras.Queries.UnusedIndexes
+                   PGExtras.Queries.VacuumStats
                    PGExtras.Helpers
   build-depends:
     base >=4.6.0.0  && <4.15
     , postgresql-simple == 0.6.3
     , text
+    , time
     , bytestring
     , raw-strings-qq
   default-language:    Haskell2010

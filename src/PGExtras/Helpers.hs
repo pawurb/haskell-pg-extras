@@ -1,48 +1,47 @@
 module PGExtras.Helpers (
-  displayColumns1,
-  displayColumns2,
-  displayColumns3,
-  displayColumns4,
-  displayColumns5,
-  displayColumns6,
-  displayColumns7,
-  displayColumns8,
-  ) where
+  maybeText,
+  maybeInt,
+  maybeRational,
+  maybeBool,
+  maybeZonedTime
+) where
+
 
 import qualified Data.Text as Text
+import Data.Time (ZonedTime)
+import Data.Ratio
 
-displayColumns1 :: (Maybe Text.Text) -> IO ()
-displayColumns1 (arg1) = do
-  putStrLn $ maybeText(arg1)
+nullString :: [Char]
+nullString = "NULL"
 
-displayColumns2 :: (Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns2 (arg1, arg2) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2)
+maybeInt :: Maybe Int -> [Char]
+maybeInt Nothing = nullString
+maybeInt (Just x) = show x
 
-displayColumns3 :: (Maybe Text.Text, Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns3 (arg1, arg2, arg3) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3)
-
-displayColumns4 :: (Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns4 (arg1, arg2, arg3, arg4) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeText(arg4)
-
-displayColumns5 :: (Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns5 (arg1, arg2, arg3, arg4, arg5) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeText(arg4) ++ " | " ++ maybeText(arg5)
-
-displayColumns6 :: (Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns6 (arg1, arg2, arg3, arg4, arg5, arg6) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeText(arg4) ++ " | " ++ maybeText(arg5) ++ " | " ++ maybeText(arg6)
-
-displayColumns7 :: (Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns7 (arg1, arg2, arg3, arg4, arg5, arg6, arg7) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeText(arg4) ++ " | " ++ maybeText(arg5) ++ " | " ++ maybeText(arg6) ++ " | " ++ maybeText(arg7)
-
-displayColumns8 :: (Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text, Maybe Text.Text) -> IO ()
-displayColumns8 (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) = do
-  putStrLn $ maybeText(arg1) ++ " | " ++ maybeText(arg2) ++ " | " ++ maybeText(arg3) ++ " | " ++ maybeText(arg4) ++ " | " ++ maybeText(arg5) ++ " | " ++ maybeText(arg6) ++ " | " ++ maybeText(arg7) ++ " | " ++ maybeText(arg8)
+maybeRational :: Maybe Rational -> [Char]
+maybeRational Nothing = nullString
+maybeRational (Just x) = showRational x
 
 maybeText :: Maybe Text.Text -> [Char]
-maybeText Nothing = "NULL"
+maybeText Nothing = nullString
 maybeText (Just x) = Text.unpack(x)
+
+maybeBool :: Maybe Bool -> [Char]
+maybeBool Nothing = nullString
+maybeBool (Just x) = show x
+
+maybeZonedTime :: Maybe ZonedTime -> [Char]
+maybeZonedTime Nothing = nullString
+maybeZonedTime (Just x) = show x
+
+showRational :: Rational -> [Char]
+showRational rat = (if num < 0 then "-" else "") ++ (shows d ("." ++ take 4 (go next)))
+    where
+        (d, next) = abs num `quotRem` den
+        num = numerator rat
+        den = denominator rat
+
+        go 0 = ""
+        go x = let (d, next) = (10 * x) `quotRem` den
+               in shows d (go next)
+
